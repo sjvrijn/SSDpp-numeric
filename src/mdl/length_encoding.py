@@ -23,16 +23,16 @@ def multinomial_with_recurrence(L, n):
     total  - COMP(L,n)
     """
     total = 1.0
-    b = 1.0
-    d = 10   # seven digit precision
     if L == 1:
         total = 1.0
     elif n == 0: 
         total = 0
     else:
+        d = 10   # seven digit precision
         bound = int(ceil(2 + sqrt(2 * n * d * log(10))))  # using equation (38)
+        b = 1.0
         for k in range(1, bound + 1):
-            b = (n - k + 1) / n * b
+            b *= (n - k + 1) / n
             total += b
         old_sum = 1.0
         for j in range(3, L + 1):
@@ -132,14 +132,13 @@ def compute_length_model(model):
     n_rules = model.number_rules
     l_rules = model.l_universal[n_rules] # empty rule not counted!
     l_pat_len = 0 # number of patterns
-    l_pat_comb = 0 
+    l_pat_comb = 0
     l_var_type = 0 # variable encoding
     for antecedent in model.antecedent_raw:
         l_pat_len += model.l_universal[len(antecedent)]
         l_pat_comb += model.l_comb[len(antecedent)]
-        l_var_type += sum([model.l_var[item[0]] for item in antecedent])
-    lm = l_rules + l_pat_len +l_pat_comb + l_var_type 
-    return lm
+        l_var_type += sum(model.l_var[item[0]] for item in antecedent)
+    return l_rules + l_pat_len +l_pat_comb + l_var_type
 
 def delta_model(model,antecedent):
     """ computes the delta model code length of adding a rule to the model 
@@ -152,9 +151,8 @@ def delta_model(model,antecedent):
     l_rules = model.l_universal[n_rules-1] - model.l_universal[n_rules] # we do not count the empty rule! 
     l_pat_len = -model.l_universal[len(antecedent)]
     l_pat_comb = -model.l_comb[len(antecedent)]
-    l_var_type =-sum([model.l_var[item[0]] for item in antecedent])
-    dlm = l_rules + l_pat_len + l_pat_comb + l_var_type
-    return dlm        
+    l_var_type = -sum(model.l_var[item[0]] for item in antecedent)
+    return l_rules + l_pat_len + l_pat_comb + l_var_type        
         
        
 #length_model={

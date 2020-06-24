@@ -27,20 +27,19 @@ depthmax=5.0
 def kullbackleibler_gaussian(mean_dataset,variance_dataset,values):
     usage = len(values)
     l_e = log2(exp(1))
-    RSS = sum([(val-mean_dataset)**2 for val in values])
+    RSS = sum((val-mean_dataset)**2 for val in values)
     variance = np.var(values)
     kl_aux1 = 0.5*log2(variance_dataset)+\
             0.5*RSS/usage/variance_dataset*l_e
     kl_aux2 = 0.5*log2(variance)+0.5*l_e
-    kl = kl_aux1 - kl_aux2 
+    kl = kl_aux1 - kl_aux2
     wkl = usage*kl
     return kl,wkl
 
 def wracc_numeric(mean_dataset,values):
     usage = len(values)
     meanval = np.mean(values)
-    wracc = usage*np.absolute(mean_dataset-meanval)
-    return wracc
+    return usage*np.absolute(mean_dataset-meanval)
 
 def discoverymetrics_numeric(targetvalues,nrules,rules_supp,rules_usg,subgroup_sets_support,subgroup_sets_usage):
     mean_dataset= np.mean(targetvalues)
@@ -49,7 +48,7 @@ def discoverymetrics_numeric(targetvalues,nrules,rules_supp,rules_usg,subgroup_s
     wacc_supp, wacc_usg = np.zeros(nrules),np.zeros(nrules)
     support, usage = np.zeros(nrules),np.zeros(nrules)
     stdrules = np.zeros(nrules)
-    top1_std = 0 
+    top1_std = 0
     for r in range(nrules):
         idx_support = list(subgroup_sets_support[r])
         values_support  =  targetvalues[idx_support]
@@ -65,18 +64,17 @@ def discoverymetrics_numeric(targetvalues,nrules,rules_supp,rules_usg,subgroup_s
         stdrules[r] = np.std(values_usage)
         if r == 0:
             top1_std =  np.std(values_usage)
-    
+
     wkl_sum = sum(wkl_usg)
     #  Average them all!!!!
-    measures = dict()
-    measures["avg_supp"] = np.mean(support)
+    measures = {"avg_supp": np.mean(support)}
     measures["kl_supp"] = np.mean(kl_supp)
     measures["wkl_supp"]  = np.mean(wkl_supp)
 
     measures["avg_usg"] = np.mean(usage)
     measures["kl_usg"]  = np.mean(kl_usg)
     measures["wkl_usg"]  = np.mean(wkl_usg)
-    
+
     measures["wacc_supp"]  = np.mean(wacc_supp)
     measures["wacc_usg"]   = np.mean(wacc_usg)
     measures["wkl_sum"] = wkl_sum
@@ -108,8 +106,8 @@ def discovery_itemset(data,model,cl):
     jaccard = np.zeros([nr,nr])
     # Find majority class
     for t in data:
-        active_r = list()
-        first = True 
+        active_r = []
+        first = True
         for r in range(nr):
             if model[r]['p'] <= t and first:
                 pred.append(model[r]['cl'])
@@ -123,12 +121,12 @@ def discovery_itemset(data,model,cl):
                         rules_usg[r][c] +=1
                         count_cl[c] +=1
                 first = False
-            elif model[r]['p'] <= t and not first:
+            elif model[r]['p'] <= t:
                 active_r.append(r)
                 intersect[r,r] +=1
                 for ic, c in enumerate(cl):
                     if c <= t:
-                        rules_supp[r][c] +=1 
+                        rules_supp[r][c] +=1
         for rr in itertools.combinations(active_r, 2):
             intersect[rr] +=1
 
@@ -137,7 +135,7 @@ def discovery_itemset(data,model,cl):
         supp1 = intersect[(rr[0],rr[0])]
         supp2 = intersect[(rr[1],rr[1])]
         jaccard[rr]= inter/(supp1+supp2-inter)  
-    
+
     # remove empty rule column and row
     jaccard = np.delete(jaccard, -1, 0)
     jaccard = np.delete(jaccard, -1, 1)
@@ -145,9 +143,9 @@ def discovery_itemset(data,model,cl):
     uptm = np.triu_indices(nr-1,1)
     jacc_avg = np.sum(jaccard)/len(uptm[0])
     jacc_consecutive_avg = np.mean(np.diagonal(jaccard,1))
-    avg_supp = np.mean([sum([rules_supp[r][c] for c in cl]) for r in range(nr-1)])
-    avg_usg = np.mean([sum([rules_usg[r][c] for c in cl]) for r in range(nr-1)])
-    
+    avg_supp = np.mean([sum(rules_supp[r][c] for c in cl) for r in range(nr-1)])
+    avg_usg = np.mean([sum(rules_usg[r][c] for c in cl) for r in range(nr-1)])
+
     return pred, prob, RULEactivated,rules_supp,rules_usg,count_cl,jacc_avg,avg_supp,avg_usg
 
 
@@ -193,8 +191,7 @@ def belongingtest_numeric(column,subset,x):
     return partial_decision
 
 def belongingtest_binary(column,subset,x):
-    partial_decision = x[column] == subset
-    return partial_decision
+    return x[column] == subset
 
 belongingtest ={
 "numeric": belongingtest_numeric,
@@ -202,14 +199,12 @@ belongingtest ={
 "nominal": belongingtest_binary
 }
 def kullback1(value,meanval,var):
-    k = 0.5*log2_0(var)+0.5*(value-meanval)**2/var*log2_0(exp(1))
-    return k
+    return 0.5*log2_0(var)+0.5*(value-meanval)**2/var*log2_0(exp(1))
 
 def kullbackleibler(value,mean1,var1,mean2,var2):
     k1 = kullback1(value,mean1,var1)
     k2 = kullback1(value,mean2,var2)
-    kl = k2-k1
-    return kl
+    return k2-k1
 
 def estimate_weigthedkullbackleibler_gaussian(default_statistic,statistic_rules,pattern4prediction,X,y):
     kl = 0        

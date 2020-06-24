@@ -114,8 +114,8 @@ def find_best_rule(model, data, attributes, tid_bitsets):
     #update_tid_bitsets(model,data, attributes,tid_bitsets)
     beam_subgroups,subgroup2add = find_best_singletons(
             model,tid_bitsets)
-    
-    for depth in range(1,model.max_depth):
+
+    for _ in range(1,model.max_depth):
         candidates2refine = [sg for sg in beam_subgroups.patterns if sg]
         beam_subgroups.clean()
         for cand in candidates2refine:
@@ -123,7 +123,7 @@ def find_best_rule(model, data, attributes, tid_bitsets):
             tid_cand = rulebitset(cand,tid_bitsets)
             refine_naive(model,cand,tid_cand,forbidden_list,tid_bitsets,
                          beam_subgroups,subgroup2add)
-    
+
     subgroup2add.bitset(tid_bitsets)
     return subgroup2add
 
@@ -145,7 +145,7 @@ def statistic_nominal(model,pattern,tid_bitsets,*other_tid):
     of the previous pattern to grow (cand), i.e., the pattern we are testing is
     cand + item
     """
-    statistic = dict()
+    statistic = {}
     usage = []
     for c in model.class_codes:    
         tid = model.bitset_class[c]
@@ -154,8 +154,8 @@ def statistic_nominal(model,pattern,tid_bitsets,*other_tid):
         if other_tid:
             tid = tid & other_tid[0]    
         usage.append(popcount(tid))
-    statistic["usage_rule"] =usage 
-    usage_total = sum(usage) 
+    statistic["usage_rule"] =usage
+    usage_total = sum(usage)
     return statistic, usage_total
 
 def statistic_numeric(model,pattern,tid_bitsets,*other_tid):
@@ -176,7 +176,7 @@ def statistic_numeric(model,pattern,tid_bitsets,*other_tid):
     return statistic, statistic["usage"]
 
 def compute_statistic_numeric(model,tid):
-    statistic = dict()
+    statistic = {}
     # pattern related part
     aux_bitset = xmpz(tid)
     idx_bits = list(aux_bitset.iter_set())
@@ -216,8 +216,7 @@ def compute_statistic_numeric(model,tid):
 @jit(nopython=True)
 def compute_RSS(values,meanval):
     c = values-meanval
-    RSS =np.dot(c,c)
-    return RSS
+    return np.dot(c,c)
 
 @jit(nopython=True)
 def find2points(values,meandata):
@@ -249,7 +248,7 @@ def compute_mean_and_twopoints(values,meandata):
         if abs(x-meandata) < dif[1] and x != closest[0]:
            closest[1] = x
            dif[1] = abs(x-meandata)
-    meanval = meanval/len(values)
+    meanval /= len(values)
     return meanval,closest,dif
 
 compute_statistic={

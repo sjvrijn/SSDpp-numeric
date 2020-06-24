@@ -96,15 +96,18 @@ class rulelist_numeric():
        
     def create_constants(self,data,attributes,target,types):
         # TODO : take this arbitrary 500 out of here!
-        self.l_universal = {key: universal_code_integers(key) for key in range(0,500)}
+        self.l_universal = {key: universal_code_integers(key) for key in range(500)}
         #compute the gamma for n points which is f(n) = log Gamma((n-1)/2)
         le2 =log(2)
         # constant that is used for the calculations of data encoding
         self.l_mean = log2(2*pi*self.default_statistic["variance"])
         self.l_e = log2(exp(1))
-        self.l_gamma = {key: gammaln(key/2)/le2 if key > 0 else 0 
-                        for key in range(0,data.shape[0]+1)}                 
-        n_variables = sum([len(vars) for vars in types.values()])
+        self.l_gamma = {
+            key: gammaln(key / 2) / le2 if key > 0 else 0
+            for key in range(data.shape[0] + 1)
+        }
+
+        n_variables = sum(len(vars) for vars in types.values())
         self.l_comb = {key: log2(comb(n_variables,key))
                   for key in range(1,self.max_depth+1)}
         self.l_var = {iat: log2(len(attributes[iat]["label_code"])) for iat in attributes}
@@ -128,10 +131,8 @@ class rulelist_numeric():
                 else:
                     print("Wrong terms for antecedent description")
             else:
-                text2add += variable_name + " = " + attributes[att][item]  
-            if idx == len(pattern)-1:
-                pass
-            else:
+                text2add += variable_name + " = " + attributes[att][item]
+            if idx != len(pattern) - 1:
                 text2add += " AND "
         self.antecedent_description.append(text2add)
         return self
@@ -148,7 +149,7 @@ class rulelist_numeric():
             subsetdefinition["type"].append(type)
             subsetdefinition["var_name"].append(var_name)
             subsetdefinition["subset"].append(subset)
-            subsetdefinition["column"].append(item[0])
+            subsetdefinition["column"].append(att)
             subsetdefinition["nitems"] += 1
         self.pattern4prediction.append(subsetdefinition)
         return self
@@ -175,8 +176,7 @@ class rulelist_numeric():
         return text2add        
             
     def check_constraints(self):
-        comply_contraint = True
-        return comply_contraint
+        return True
                 
     
     def compute_jaccard_index(self,tid_bitsets):

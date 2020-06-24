@@ -86,17 +86,14 @@ class SSDC():
         if self.number_rules == 0:
             text2print = "There are not rules"
         else:
-            text2print = "" 
+            text2print = ""
             for nr,ant in enumerate(self.antecedent_description):
-                if nr == 0:
-                    text2print += "IF x in "
-                else: 
-                    text2print += "ELSE IF x in "
+                text2print += "IF x in " if nr == 0 else "ELSE IF x in "
                 text2print += ant + " THEN " + self.consequent_description[nr] +\
                             " \n"
             text2print += "ELSE " + self.consequent_lastrule_description
-                
-                
+
+
         return text2print
 
     def fit(self,df):
@@ -178,11 +175,8 @@ class SSDC():
         return self
     
     def rulelist_description(self):
-        text2add = "" 
+        text2add = ""
         for nr,ant in enumerate(self.antecedent_description):
-            if nr == 0:
-                text2add += "IF "
-            else: 
-                text2add += "ELSE IF "
+            text2add += "IF " if nr == 0 else "ELSE IF "
             text2add += ant + " THEN " + self.consequent_description[nr] +\
             " \n"
