@@ -61,9 +61,8 @@ def individual_data_length(model,statistic):
     return l_d_ind
 
 def refined_bayesian_length(model,n,variance):
-    l = 1+n/2*log2_0(pi)-model.l_gamma[n]+0.5*log2_0(n+1)+\
+    return 1+n/2*log2_0(pi)-model.l_gamma[n]+0.5*log2_0(n+1)+\
               n/2*log2_0(n*variance)
-    return l
 
 
 def defaultrule_data_length(model):
@@ -94,15 +93,12 @@ def delta_data_numeric_independent(model,statistic):
         l_default_usage = 0.5*statistic["usage_default"]*model.l_mean+\
             0.5*model.l_e*statistic["sse_default_support"]/model.default_statistic["variance"]
         l_default = 0.5*statistic["usage"]*model.l_mean+\
-            0.5*model.l_e*statistic["sse_default_support"]/model.default_statistic["variance"]        
+            0.5*model.l_e*statistic["sse_default_support"]/model.default_statistic["variance"]
         #l_default = 0.5*statistic["usage"]*model.l_mean+\
-        # 0.5*model.l_e*statistic["sse_default"]/model.default_statistic["variance"] # sequential 
-        if l_default_usage < 0:
-            dld = NINF           
-        else:    
-            dld = l_default          
+        # 0.5*model.l_e*statistic["sse_default"]/model.default_statistic["variance"] # sequential
+        dld = NINF if l_default_usage < 0 else l_default
     else:
-        print("Wrong task selected") 
+        print("Wrong task selected")
     # new pattern 
     if statistic["usage"]:
         l_individual = individual_data_length(model, statistic)

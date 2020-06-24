@@ -10,16 +10,16 @@ from pandas.api.types import is_numeric_dtype
 
 def transform_dataset(dforig,target_type,ncutpoints,disc_type):
     # attributes
-    attributes = dict()
+    attributes = {}
     df = dforig.copy()
     att_names= df.columns
-    nrows = df.shape[0] 
+    nrows = df.shape[0]
     types = {type: []   for type in ["numeric","nominal","binary","ordinal"]}
-    # initialize input of variables (binary, nominal, numeric) 
+    # initialize input of variables (binary, nominal, numeric)
     for idx in range(df.shape[1]-1):
         colname = att_names[idx]
         # add original name of variable:
-        attributes[idx] = dict()
+        attributes[idx] = {}
         attributes[idx]["attribute_name"] = colname
         # add and initialize type of variable
         if is_numeric_dtype(df[colname]):
@@ -36,37 +36,37 @@ def transform_dataset(dforig,target_type,ncutpoints,disc_type):
     # initialize target variable
     idx = df.shape[1]-1
     target = init_target[target_type](df,att_names,idx)
- 
+
     # transform dataset to 2 numpy arrays
     data = df.values
-    
+
     # initialize the bisets 
-    target,tid_bitsets =  create_bitsets(data,target_type,attributes,target)   
+    target,tid_bitsets =  create_bitsets(data,target_type,attributes,target)
     return data,attributes,target,types,tid_bitsets
 
 
 def init_attribute_binary(attributes,colname,types,idx,categories,operators = None):
     types["binary"].append(idx)
-    attributes[idx] = dict()
+    attributes[idx] = {}
     attributes[idx]["type"] = "binary"
-    attributes[idx]["attribute_name"] = colname    
+    attributes[idx]["attribute_name"] = colname
     attributes[idx]["n_labels"] = len(categories)
     attributes[idx]["label_orig"] = categories
     attributes[idx]["label_code"] = [int(auxi) for auxi in range(len(categories))]
     
 def init_attribute_nominal(attributes,colname,types,idx,categories,operators = None):
     types["nominal"].append(idx)
-    attributes[idx] = dict()
+    attributes[idx] = {}
     attributes[idx]["type"] = "nominal"
-    attributes[idx]["attribute_name"] = colname    
+    attributes[idx]["attribute_name"] = colname
     attributes[idx]["n_labels"] = len(categories)
     attributes[idx]["label_orig"] = categories
     attributes[idx]["label_code"] = [int(auxi) for auxi in range(len(categories))] 
 
 def init_attribute_numeric(attributes,colname,types,idx,nrows,ncutpoints,disc_type):
-    attributes[idx] = dict()
+    attributes[idx] = {}
     attributes[idx]["type"] = "numeric"
-    attributes[idx]["attribute_name"] = colname        
+    attributes[idx]["attribute_name"] = colname
     attributes[idx]["discretization"] = disc_type # or numeric
     attributes[idx]["ncutpoints"] = ncutpoints # or numeric
     attributes[idx]["delta"] = nrows /(ncutpoints+1) # or numeric
@@ -89,22 +89,24 @@ def init_target_nominal(df,att_names,idx):
     categories = list(df[colname].cat.categories)
     nlabels = len(categories)
     df.loc[:,colname]  = df[colname].cat.codes #transform this column to codes        
-    target = dict()
-    target["type"] = "nominal"
-    target["attribute_name"] = colname        
-    target["n_labels"] = nlabels
-    target["label_orig"] = categories
-    target["label_code"] = [int(auxi) for auxi in range(len(categories))] 
+    target = {
+        "type": "nominal",
+        "attribute_name": colname,
+        "n_labels": nlabels,
+        "label_orig": categories,
+        "label_code": [int(auxi) for auxi in range(len(categories))],
+    }
+
     unique, counts = np.unique(df[colname], return_counts=True)
     target["counts"] = dict(zip(unique, counts))
     target["n_rows"] = df.shape[0]
     return target
 
 def init_target_numeric(df,att_names,idx):
-    target = dict()
+    target = {}
     colname = att_names[idx]
     target["type"] = "numeric"
-    target["attribute_name"] = colname 
+    target["attribute_name"] = colname
     target["max"] = np.max(df[colname])
     target["min"] = np.min(df[colname])
     target["mean"] = np.mean(df[colname])
@@ -129,7 +131,7 @@ def init_bitset_binary(data,attributes,i_at,tid_bitsets):
     labels = attributes[i_at]["label_code"]
     attributes[i_at]["category_code"] = []
     for il in labels:
-        tid_bitsets[(i_at,il)]= dict()
+        tid_bitsets[(i_at,il)] = {}
         vector_category = np.where(data[:,i_at]==il)[0]
         tid_bitsets[(i_at,il)]= indexes2bitset(vector_category)
         #attributes[i_at][(i_at,il)] = att_name + " == " + attributes[i_at]["label_orig"][il]
@@ -181,11 +183,11 @@ def init_bitset_numeric(data,attributes,i_at,tid_bitsets,*index_not_consider):
     idx_sorted = np.delete(idx_sorted, np.argwhere(np.isnan(data[idx_sorted,i_at])))
     if index_not_consider:
         idx_sorted = np.setdiff1d(idx_sorted,index_not_consider,assume_unique=True)
-    if len(idx_sorted) < 2: return    
+    if len(idx_sorted) < 2: return
     ncutpoints = attributes[i_at]["ncutpoints"]
-    quantiles = [1/(ncutpoints+1)*ncut for ncut in range(0,ncutpoints+2)]
+    quantiles = [1/(ncutpoints+1)*ncut for ncut in range(ncutpoints+2)]
     val_quantiles = np.nanquantile(data[idx_sorted,i_at], quantiles)
-    if np.isnan(val_quantiles).any(): return    
+    if np.isnan(val_quantiles).any(): return
     bin_counts,bin_edges = np.histogram(data[idx_sorted,i_at],bins=val_quantiles)
     index_points = np.unique([sum(bin_counts[:idx]) for idx in range(1,len(bin_counts))])
     ncutpoints = len(index_points) # check if the number of ncut is smaller than pretended
@@ -197,19 +199,19 @@ def init_bitset_numeric(data,attributes,i_at,tid_bitsets,*index_not_consider):
     for n_cut in range(1,ncutpoints+1):
         idx_cutpoint = index_points[n_cut-1]
         idx_down = idx_sorted[:idx_cutpoint]
-        idx_up = idx_sorted[idx_cutpoint:]        
-        tid_bitsets[(i_at,-n_cut)] = dict()
-        tid_bitsets[(i_at,n_cut)] = dict()
+        idx_up = idx_sorted[idx_cutpoint:]
+        tid_bitsets[(i_at,-n_cut)] = {}
+        tid_bitsets[(i_at,n_cut)] = {}
         #val_cutpoint = data[idx_sorted[idx_cutpoint],i_at]
         val_cutpoint_up = data[idx_sorted[idx_cutpoint],i_at]
-        val_cutpoint_down = data[idx_sorted[idx_cutpoint-1],i_at]      
+        val_cutpoint_down = data[idx_sorted[idx_cutpoint-1],i_at]
         tid_bitsets[(i_at,-n_cut)] = indexes2bitset(idx_down)
         #attributes[i_at][(i_at,-n_cut)] = att_name + " in ["+str(minval) +";"+str(val_cutpoint)+")"
         attributes[i_at][(i_at,-n_cut)] = ["maxvalue",val_cutpoint_down]
         tid_bitsets[(i_at,n_cut)] = indexes2bitset(idx_up)
         #attributes[i_at][(i_at,n_cut)] = att_name + " in ["+str(val_cutpoint) +";"+str(maxval)+"]"
         attributes[i_at][(i_at,n_cut)] = ["minvalue",val_cutpoint_up]
-    
+
     label_interval = []
     for n_cut1 in range(1,ncutpoints+1):
         for n_cut2 in range(n_cut1+1,ncutpoints+1):
@@ -267,7 +269,7 @@ init_bitset_variable={
 };
         
 def init_bitset_target_nominal(data,target):
-    target["bitset"] = dict()
+    target["bitset"] = {}
     for c in target["label_code"]:    
         cl_index = np.where(data[:,-1]==c)[0] 
         target["bitset"][c] = indexes2bitset(cl_index)
@@ -283,7 +285,7 @@ init_bitset_target={
 # convert the transactions ids to bitsets conditional on the target label
 def create_bitsets(data,target_type,attributes,target):
     #tid_bitsets = {c: dict() for c in target["label_code"]}
-    tid_bitsets = dict()
+    tid_bitsets = {}
     init_bitset_target[target_type](data,target)
     for i_at in attributes:
         type_variable = attributes[i_at]["type"]

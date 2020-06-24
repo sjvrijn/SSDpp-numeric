@@ -5,6 +5,7 @@ Created on Thu Nov 21 13:16:23 2019
 @author: gathu
 """
 
+
 import pandas as pd
 import numpy as np
 import os
@@ -20,23 +21,23 @@ tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),
              (227, 119, 194), (247, 182, 210), (127, 127, 127), (199, 199, 199),    
              (188, 189, 34), (219, 219, 141), (23, 190, 207), (158, 218, 229)]
 
- 
+
 datasetnames= ["sonar","haberman","breastCancer","australian","TicTacToe","german",\
                "chess","mushrooms","magic","adult","iris","balance","CMC","page-blocks",\
                "nursery","automobile","glass","dermatology","kr-vs-k","abalone"] 
 
 datasetnames= ["sonar",\
                "german","magic","adult",\
-               "balance","kr-vs-k"] 
+               "balance","kr-vs-k"]
 filesfolder = "./results/all_beam_width/"
-results = dict()
+results = {}
 df = pd.read_csv(filesfolder+"summary.csv")
 for datasetname in datasetnames:
     dfaux= df[df["datasetname"]==datasetname]
-    results[datasetname] = dict()
+    results[datasetname] = {}
     results[datasetname]["beamsize"]= dfaux.index.values
-    results[datasetname]["length_ratio"]  = np.round (dfaux.length_ratio.values,2)  
-    results[datasetname]["wkl_sum"] = dfaux.wkl_sum.values 
+    results[datasetname]["length_ratio"]  = np.round (dfaux.length_ratio.values,2)
+    results[datasetname]["wkl_sum"] = dfaux.wkl_sum.values
     results[datasetname]["time"] = dfaux.runtime
     
 # now make a plot!!!"#!"#!"#!"#!"#!"#!#!

@@ -46,8 +46,7 @@ def belongingtest_numeric(column,subset,x):
     return partial_decision
 
 def belongingtest_binary(column,subset,x):
-    partial_decision = x[column] == subset
-    return partial_decision
+    return x[column] == subset
 
 belongingtest ={
 "numeric": belongingtest_numeric,
@@ -59,19 +58,16 @@ from math import pi,exp
 from src.util.general_functions import log2_0 
 
 def gaussian_density(value,var,mean):
-    prob = 1/(2*pi*var)**0.5*exp(-(value-mean)**2/var/2)
-    return prob
+    return 1/(2*pi*var)**0.5*exp(-(value-mean)**2/var/2)
 
 def kullback1(value,mean,var):
-    k = 0.5*log2_0(var)+0.5*(value-mean)**2/var*log2_0(exp(1))
-    return k
+    return 0.5*log2_0(var)+0.5*(value-mean)**2/var*log2_0(exp(1))
 
 
 def kullbackleibler(value,mean1,var1,mean2,var2):
     k1 = kullback1(value,mean1,var1)
     k2 = kullback1(value,mean2,var2)
-    kl = k2-k1
-    return kl
+    return k2-k1
     
 #def kullbackleibler(value,mean1,var1,mean2,var2):
 #    dens1 = gaussian_density(value,var1,mean1)

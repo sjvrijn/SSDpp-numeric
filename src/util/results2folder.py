@@ -17,13 +17,9 @@ def makefolder_time():
     return folder_path
 
 def makefolder_name(foldername):
-    folder_path = os.path.join("results",foldername) 
+    folder_path = os.path.join("results",foldername)
     if not os.path.exists(folder_path):
-    	os.mkdir(folder_path)
-    else:
-    	if False:
-    		shutil.rmtree(folder_path)
-    		os.mkdir(folder_path)
+        os.mkdir(folder_path)
     return folder_path
 
 def attach_results(model,string,datasetname):
